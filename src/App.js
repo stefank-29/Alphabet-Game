@@ -93,6 +93,7 @@ function App() {
     const [marks, setMarks] = useState([]);
     const marksRef = useRef(marks);
 
+    const [currLetter, setCurrLetter] = useState('');
     const [currNum, setCurrNum] = useState(0);
     const currNumRef = useRef(currNum);
 
@@ -129,6 +130,8 @@ function App() {
     }, []);
 
     function checkLetter(e) {
+        if (!(e.key >= 'a') && e.key <= 'z') return; // if not a letter return
+        setCurrLetter(e.key.toUpperCase());
         const currNum = randomNumbersRef.current[currNumRef.current];
         let marksArr = [];
         if (e.key !== alphabet.lower[currNum - 1]) {
@@ -136,19 +139,41 @@ function App() {
             marksArr = marksRef.current.map((mark) =>
                 mark.number === currNum ? { ...mark, mark: false } : mark
             );
+            setMissCount((prev) => prev + 1);
         } else {
             // hit
             marksArr = marksRef.current.map((mark) =>
                 mark.number === currNum ? { ...mark, mark: true } : mark
             );
+            setHitCount((prev) => prev + 1);
         }
+        nextNumber();
+        setLeftCount((prev) => prev - 1);
         setMarks(marksArr);
         marksRef.current = marksArr;
     }
 
+    // called on timeout
     function changeNumber() {
+        const currentNumber = randomNumbersRef.current[currNumRef.current];
+        let marksArr = [];
+        marksArr = marksRef.current.map((mark) =>
+            mark.number === currentNumber ? { ...mark, mark: false } : mark
+        );
+        setMissCount((prev) => prev + 1);
+        setLeftCount((prev) => prev - 1);
+        setMarks(marksArr);
+        marksRef.current = marksArr;
         setCurrNum((prevState) => prevState + 1);
         currNumRef.current = currNumRef.current + 1;
+    }
+
+    // called on keypressed
+    function nextNumber() {
+        clearInterval(interval);
+        setCurrNum((prevState) => prevState + 1);
+        currNumRef.current = currNumRef.current + 1;
+        interval = setInterval(changeNumber, 3500);
     }
 
     function startGame() {
@@ -175,14 +200,14 @@ function App() {
                             Stop Game
                         </button>
                     )}
+                    <pre>{JSON.stringify(marks)}</pre>
                     <div className="display">{randomNumbers[currNum]}</div>
                     <input
                         type="text"
                         className="letter-input"
                         placeholder="Input letter"
+                        value={currLetter}
                     />
-                    <pre>{JSON.stringify(randomNumbers)}</pre>
-                    <pre>{JSON.stringify(marks)}</pre>
                 </DisplayStyles>
                 <div className="score">
                     <div className="label">Score</div>

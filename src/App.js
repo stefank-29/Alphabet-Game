@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import Grid from './components/Grid';
 
 const GameStyles = styled.div`
     height: 100vh;
@@ -109,6 +110,7 @@ function App() {
                     </div>
                 </div>
             </HeaderStyles>
+            <Grid />
         </GameStyles>
     );
 }

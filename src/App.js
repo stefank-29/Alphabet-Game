@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { start } from 'pretty-error';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Grid from './components/Grid';
 
@@ -81,8 +82,10 @@ function App() {
     const [hitCount, setHitCount] = useState(0);
     const [missCount, setMissCount] = useState(0);
     const [leftCount, setLeftCount] = useState(26);
+    const [gameStarted, setGameStarted] = useState(false);
 
-    const [randomNumbers, setRandomNumbers] = useState();
+    const [randomNumbers, setRandomNumbers] = useState([]);
+    const [currNum, setCurrNum] = useState(0);
 
     function populateNumbers(length) {
         const arr = [];
@@ -92,8 +95,8 @@ function App() {
         return arr;
     }
 
-    function generateGameNumbers(a) {
-        const numbers = populateNumbers();
+    function generateGameNumbers() {
+        const numbers = populateNumbers(26);
         for (let i = numbers.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
@@ -101,17 +104,41 @@ function App() {
         setRandomNumbers(numbers);
     }
 
+    useEffect(() => {
+        generateGameNumbers();
+    }, []);
+
+    function changeNumber() {
+        setCurrNum((prevState) => prevState + 1);
+    }
+
+    function startGame() {
+        setInterval(changeNumber, 3500);
+        setGameStarted(true);
+    }
+
+    function resetGame() {}
+
     return (
         <GameStyles>
             <HeaderStyles>
                 <DisplayStyles>
-                    <button className="start-btn">Start Game</button>
-                    <div className="display">{17}</div>
+                    {!gameStarted ? (
+                        <button className="start-btn" onClick={startGame}>
+                            Start Game
+                        </button>
+                    ) : (
+                        <button className="start-btn" onClick={resetGame}>
+                            Stop Game
+                        </button>
+                    )}
+                    <div className="display">{randomNumbers[currNum]}</div>
                     <input
                         type="text"
                         className="letter-input"
                         placeholder="Input letter"
                     />
+                    <pre>{JSON.stringify(randomNumbers)}</pre>
                 </DisplayStyles>
                 <div className="score">
                     <div className="label">Score</div>

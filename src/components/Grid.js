@@ -18,7 +18,7 @@ export default function Grid() {
     return (
         <GridStyles>
             {[...Array(26)].map((_, index) => (
-                <div className="letter-cell">
+                <div className="letter-cell" key={index}>
                     <span className="letter">{alphabet.upper[index]}</span>
                     <span className="number"> {` (${index + 1})`}</span>
                 </div>

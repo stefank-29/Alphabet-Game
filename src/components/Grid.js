@@ -11,14 +11,29 @@ const GridStyles = styled.div`
         font-size: 2rem;
         color: #006699;
         margin: 2rem 0;
+        &.hit {
+            color: #2eb82e;
+        }
+        &.miss {
+            color: #b30000;
+        }
     }
 `;
 
-export default function Grid() {
+export default function Grid({ marks }) {
     return (
         <GridStyles>
             {[...Array(26)].map((_, index) => (
-                <div className="letter-cell" key={index}>
+                <div
+                    className={`letter-cell ${
+                        marks[index]?.mark === true
+                            ? 'hit'
+                            : marks[index]?.mark === false
+                            ? 'miss'
+                            : ''
+                    }`}
+                    key={index}
+                >
                     <span className="letter">{alphabet.upper[index]}</span>
                     <span className="number"> {` (${index + 1})`}</span>
                 </div>

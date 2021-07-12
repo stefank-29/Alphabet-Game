@@ -1,7 +1,8 @@
 import { start } from 'pretty-error';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Grid from './components/Grid';
+import alphabet from 'alphabet';
 
 const GameStyles = styled.div`
     height: 100vh;
@@ -78,6 +79,8 @@ const DisplayStyles = styled.div`
     }
 `;
 
+let interval;
+
 function App() {
     const [hitCount, setHitCount] = useState(0);
     const [missCount, setMissCount] = useState(0);
@@ -85,13 +88,28 @@ function App() {
     const [gameStarted, setGameStarted] = useState(false);
 
     const [randomNumbers, setRandomNumbers] = useState([]);
+    const randomNumbersRef = useRef(randomNumbers);
+
+    const [marks, setMarks] = useState([]);
+    const marksRef = useRef(marks);
+
     const [currNum, setCurrNum] = useState(0);
+    const currNumRef = useRef(currNum);
 
     function populateNumbers(length) {
         const arr = [];
+        // array for random permutation
         for (let i = 0; i < length; i++) {
             arr.push(i + 1);
         }
+
+        const marks = [];
+        // array of objects for marking if is hit or miss
+        for (let i = 0; i < length; i++) {
+            marks.push({ number: i + 1, mark: null });
+        }
+        setMarks(marks);
+        marksRef.current = marks;
         return arr;
     }
 
@@ -101,23 +119,48 @@ function App() {
             const j = Math.floor(Math.random() * (i + 1));
             [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
         }
+        randomNumbersRef.current = numbers;
         setRandomNumbers(numbers);
     }
 
     useEffect(() => {
         generateGameNumbers();
+        window.addEventListener('keydown', checkLetter);
     }, []);
+
+    function checkLetter(e) {
+        const currNum = randomNumbersRef.current[currNumRef.current];
+        let marksArr = [];
+        if (e.key !== alphabet.lower[currNum - 1]) {
+            // miss
+            marksArr = marksRef.current.map((mark) =>
+                mark.number === currNum ? { ...mark, mark: false } : mark
+            );
+        } else {
+            // hit
+            marksArr = marksRef.current.map((mark) =>
+                mark.number === currNum ? { ...mark, mark: true } : mark
+            );
+        }
+        setMarks(marksArr);
+        marksRef.current = marksArr;
+    }
 
     function changeNumber() {
         setCurrNum((prevState) => prevState + 1);
+        currNumRef.current = currNumRef.current + 1;
     }
 
     function startGame() {
-        setInterval(changeNumber, 3500);
+        generateGameNumbers();
+        interval = setInterval(changeNumber, 3500);
         setGameStarted(true);
     }
 
-    function resetGame() {}
+    function resetGame() {
+        clearInterval(interval);
+        setGameStarted(false);
+    }
 
     return (
         <GameStyles>
@@ -139,6 +182,7 @@ function App() {
                         placeholder="Input letter"
                     />
                     <pre>{JSON.stringify(randomNumbers)}</pre>
+                    <pre>{JSON.stringify(marks)}</pre>
                 </DisplayStyles>
                 <div className="score">
                     <div className="label">Score</div>
@@ -156,7 +200,7 @@ function App() {
                     </div>
                 </div>
             </HeaderStyles>
-            <Grid />
+            <Grid marks={marks} />
         </GameStyles>
     );
 }

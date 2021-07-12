@@ -82,6 +82,25 @@ function App() {
     const [missCount, setMissCount] = useState(0);
     const [leftCount, setLeftCount] = useState(26);
 
+    const [randomNumbers, setRandomNumbers] = useState();
+
+    function populateNumbers(length) {
+        const arr = [];
+        for (let i = 0; i < length; i++) {
+            arr.push(i + 1);
+        }
+        return arr;
+    }
+
+    function generateGameNumbers(a) {
+        const numbers = populateNumbers();
+        for (let i = numbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+        }
+        setRandomNumbers(numbers);
+    }
+
     return (
         <GameStyles>
             <HeaderStyles>

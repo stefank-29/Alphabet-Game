@@ -112,6 +112,8 @@ function App() {
         marksRef.current = marksArr;
         setCurrNum((prevState) => prevState + 1);
         currNumRef.current = currNumRef.current + 1;
+        clearInterval(interval);
+        interval = setInterval(changeNumber, 3500);
     }
 
     // called on keypressed
@@ -152,9 +154,7 @@ function App() {
                             Stop Game
                         </button>
                     )}
-                    <div className="display">
-                        {randomNumbers[currNumRef.current]}
-                    </div>
+                    <div className="display">{randomNumbers[currNum]}</div>
                     <input
                         type="text"
                         className="letter-input"

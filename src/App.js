@@ -66,8 +66,10 @@ function App() {
     }, []);
 
     useEffect(() => {
+        // stop the game after 26 rounds
         if (leftCount === 0) {
-            clearInterval(interval); // stop the game after 26 rounds
+            setGameStarted(false);
+            clearInterval(interval);
         }
     }, [leftCount]);
 
@@ -124,7 +126,6 @@ function App() {
         generateGameNumbers();
         setHitCount(0);
         setMissCount(0);
-        setLeftCount(26);
         leftRef.current = 26;
         setCurrNum(0);
         currNumRef.current = 0;
@@ -151,7 +152,9 @@ function App() {
                             Stop Game
                         </button>
                     )}
-                    <div className="display">{randomNumbers[currNum]}</div>
+                    <div className="display">
+                        {randomNumbers[currNumRef.current]}
+                    </div>
                     <input
                         type="text"
                         className="letter-input"

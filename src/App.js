@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import Grid from './components/Grid';
 import alphabet from 'alphabet';
+import DisplayStyles from './styles/DisplayStyles';
+import HeaderStyles from './styles/HeaderStyles';
 
 const GameStyles = styled.div`
     height: 100vh;
@@ -12,79 +14,13 @@ const GameStyles = styled.div`
     flex-direction: column;
 `;
 
-const HeaderStyles = styled.header`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 5rem;
-    .score {
-        font-size: 2rem;
-        display: flex;
-        flex-direction: column;
-        .label {
-            color: #a3a3c2;
-        }
-        .hit {
-            color: #2eb82e;
-        }
-        .miss {
-            color: #b30000;
-        }
-        .left {
-            color: #5c5cd6;
-        }
-    }
-`;
-
-const DisplayStyles = styled.div`
-    margin-right: 10rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    .start-btn {
-        width: 12rem;
-        padding: 1.2rem 1.5rem;
-        margin-bottom: 2.5rem;
-        border-radius: 5px;
-        border: 1px solid #0066ff;
-        color: #0066ff;
-        background: none;
-        transition: background 0.3s ease-in-out;
-        cursor: pointer;
-        :hover {
-            background-color: rgba(0, 77, 255, 0.1);
-        }
-    }
-    .display {
-        font-size: 4rem;
-        color: #00001a;
-        text-align: center;
-        margin-bottom: 2rem;
-    }
-    .letter-input {
-        padding: 1rem 1.2rem;
-        outline: none;
-        border: 2px solid #338aff;
-        border-radius: 4px;
-        font-size: 1.6rem;
-        outline: none;
-        background-color: #fefefecc;
-        ::placeholder {
-            font-weight: 700;
-        }
-        :hover,
-        :focus {
-            box-shadow: 0 0 4px 1px #668aff77;
-        }
-    }
-`;
-
 let interval;
 
 function App() {
     const [hitCount, setHitCount] = useState(0);
     const [missCount, setMissCount] = useState(0);
     const [leftCount, setLeftCount] = useState(26);
+    const leftRef = useRef(leftCount);
     const [gameStarted, setGameStarted] = useState(false);
 
     const [randomNumbers, setRandomNumbers] = useState([]);
@@ -129,8 +65,14 @@ function App() {
         window.addEventListener('keydown', checkLetter);
     }, []);
 
+    useEffect(() => {
+        if (leftCount === 0) {
+            clearInterval(interval); // stop the game after 26 rounds
+        }
+    }, [leftCount]);
+
     function checkLetter(e) {
-        if (!(e.key >= 'a') && e.key <= 'z') return; // if not a letter return
+        if ((!(e.key >= 'a') && e.key <= 'z') || leftRef.current === 0) return; // if not a letter return
         setCurrLetter(e.key.toUpperCase());
         const currNum = randomNumbersRef.current[currNumRef.current];
         let marksArr = [];
@@ -149,6 +91,7 @@ function App() {
         }
         nextNumber();
         setLeftCount((prev) => prev - 1);
+        leftRef.current = leftRef.current - 1;
         setMarks(marksArr);
         marksRef.current = marksArr;
     }
@@ -162,6 +105,7 @@ function App() {
         );
         setMissCount((prev) => prev + 1);
         setLeftCount((prev) => prev - 1);
+        leftRef.current = leftRef.current - 1;
         setMarks(marksArr);
         marksRef.current = marksArr;
         setCurrNum((prevState) => prevState + 1);
@@ -178,6 +122,13 @@ function App() {
 
     function startGame() {
         generateGameNumbers();
+        setHitCount(0);
+        setMissCount(0);
+        setLeftCount(26);
+        leftRef.current = 26;
+        setCurrNum(0);
+        currNumRef.current = 0;
+        clearInterval(interval);
         interval = setInterval(changeNumber, 3500);
         setGameStarted(true);
     }
@@ -200,7 +151,6 @@ function App() {
                             Stop Game
                         </button>
                     )}
-                    <pre>{JSON.stringify(marks)}</pre>
                     <div className="display">{randomNumbers[currNum]}</div>
                     <input
                         type="text"
